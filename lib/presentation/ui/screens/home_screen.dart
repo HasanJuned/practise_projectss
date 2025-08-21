@@ -24,13 +24,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadData() async {
     await informationController.getData();
-    setState(() {
-
-    });
+    setState(() {});
     list = informationController.list;
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -85,9 +81,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   return ListTile(
                     title: Text(list[index]["title"] ?? ""),
                     subtitle: Text(list[index]["subtitle"] ?? ""),
-                    trailing: IconButton(onPressed: (){
-                      removeSingleData(index);
-                    }, icon: Icon(Icons.delete)),
+                    trailing: IconButton(
+                      onPressed: () {
+                        removeSingleData(index);
+                      },
+                      icon: Icon(Icons.delete),
+                    ),
                   );
                 },
               ),
@@ -99,6 +98,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> addData() async {
+    if (_titleController.text.isEmpty || _subtitleController.text.isEmpty) {
+      return;
+    }
 
     Map<String, String> entry = {
       "title": _titleController.text,
@@ -114,19 +116,17 @@ class _HomeScreenState extends State<HomeScreen> {
     _subtitleController.clear();
   }
 
-  void removeSingleData(int index) async{
+  void removeSingleData(int index) async {
     list.removeAt(index);
-    setState(() {
-
-    });
+    setState(() {});
     await informationController.setData(list);
   }
 
-  void removeAllData() async{
+  void removeAllData() async {
     await informationController.removeAllData();
-    _loadData(); /// recall the load data
-    setState(() {
+    _loadData();
 
-    });
+    /// recall the load data
+    setState(() {});
   }
 }
