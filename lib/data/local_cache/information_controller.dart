@@ -1,26 +1,33 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InformationController {
-  List<String> list = [];
+  List<Map<String, String>> list = [];
 
-  /// set
-  Future<void> setData(List<String> newList) async {
-
+  /// Save data
+  Future<void> setData(List<Map<String, String>> newList) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('info', newList);
+    String jsonString = jsonEncode(newList);
+    await prefs.setString('info', jsonString);
     list = newList;
-
   }
 
-  /// get
+  /// Load data
   Future<void> getData() async {
     final prefs = await SharedPreferences.getInstance();
-    list = prefs.getStringList('info') ?? [];
+    String? jsonString = prefs.getString('info');
+    if (jsonString != null) {
+      List decoded = jsonDecode(jsonString);
+      list = decoded.map((e) => Map<String, String>.from(e)).toList();
+    } else {
+      list = [];
+    }
   }
 
   Future<void> removeAllData() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.clear();
+    await prefs.clear();
   }
 
 

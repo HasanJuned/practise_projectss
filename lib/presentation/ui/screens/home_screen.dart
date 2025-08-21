@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../../data/local_cache/information_controller.dart';
+import 'package:practise_project_ostadd/data/local_cache/information_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,12 +9,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _numberController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _subtitleController = TextEditingController();
 
   late InformationController informationController;
-  List<String> list = [];
-
+  List<Map<String, String>> list = [];
 
   @override
   void initState() {
@@ -26,24 +24,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadData() async {
     await informationController.getData();
+    setState(() {
+
+    });
     list = informationController.list;
   }
 
-  Future<void> addData() async {
 
-    list.addAll([_nameController.text, _numberController.text]);
-    await informationController.setData(list);
-    setState(() {});
-
-    _nameController.clear();
-    _numberController.clear();
-  }
-
-  removeItem(int index) {
-    list.removeAt(index);
-    setState(() {});
-    informationController.setData(list);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,30 +43,38 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          spacing: 4,
+          spacing: 8,
           children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(hintText: "Title"),
+            TextFormField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                hintText: "title",
+                border: OutlineInputBorder(),
+              ),
             ),
-            TextField(
-              controller: _numberController,
-              decoration: const InputDecoration(hintText: "Subtitle"),
+            TextFormField(
+              controller: _subtitleController,
+              decoration: const InputDecoration(
+                hintText: "subtitle",
+                border: OutlineInputBorder(),
+              ),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 10),
             SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(onPressed: addData, child: const Text('Save'))),
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: addData,
+                child: const Text('Save'),
+              ),
+            ),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () async {
-                  await informationController.removeAllData();
-                  await informationController.getData();
-                  setState(() {});
+                onPressed: () {
+                  removeAllData();
                 },
-                child: const Text('Remove all'),
+                child: const Text('Remove All'),
               ),
             ),
             const SizedBox(height: 20),
@@ -87,11 +82,12 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ListView.builder(
                 itemCount: list.length,
                 itemBuilder: (context, index) {
-                  return InkWell(
-                    onLongPress: () {
-                      removeItem(index);
-                    },
-                    child: ListTile(title: Text(list[index])),
+                  return ListTile(
+                    title: Text(list[index]["title"] ?? ""),
+                    subtitle: Text(list[index]["subtitle"] ?? ""),
+                    trailing: IconButton(onPressed: (){
+                      removeSingleData(index);
+                    }, icon: Icon(Icons.delete)),
                   );
                 },
               ),
@@ -100,5 +96,37 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> addData() async {
+
+    Map<String, String> entry = {
+      "title": _titleController.text,
+      "subtitle": _subtitleController.text,
+    };
+
+    list.add(entry);
+
+    await informationController.setData(list);
+    setState(() {});
+
+    _titleController.clear();
+    _subtitleController.clear();
+  }
+
+  void removeSingleData(int index) async{
+    list.removeAt(index);
+    setState(() {
+
+    });
+    await informationController.setData(list);
+  }
+
+  void removeAllData() async{
+    await informationController.removeAllData();
+    _loadData(); /// recall the load data
+    setState(() {
+
+    });
   }
 }
