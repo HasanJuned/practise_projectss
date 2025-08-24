@@ -36,8 +36,6 @@ class _HomeScreenState extends State<HomeScreen> {
               return RadioListTile(
                 title: Text(index),
                 value: index,
-
-                /// java
                 groupValue: selectedOptions,
                 onChanged: (x) {
                   selectedOptions = x;
