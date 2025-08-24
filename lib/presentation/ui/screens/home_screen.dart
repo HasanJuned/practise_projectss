@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:practise_project_ostadd/data/local_cache/information_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,124 +8,73 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _subtitleController = TextEditingController();
+  String? selectedOptions;
 
-  late InformationController informationController;
-  List<Map<String, String>> list = [];
+  Map<String, dynamic> options = {'flutter': 0, 'java': 0, 'c': 0, 'mern': 0};
 
-  @override
-  void initState() {
-    super.initState();
-    informationController = InformationController();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    await informationController.getData();
+  void calculateVote() {
+    options[selectedOptions!]++;
     setState(() {});
-    list = informationController.list;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Todo'),
-        backgroundColor: Colors.yellow,
+        title: Text('Vote'),
+        backgroundColor: Colors.purpleAccent,
         centerTitle: true,
+        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.camera))],
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          spacing: 8,
+          spacing: 10,
           children: [
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                hintText: "title",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            TextFormField(
-              controller: _subtitleController,
-              decoration: const InputDecoration(
-                hintText: "subtitle",
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: addData,
-                child: const Text('Save'),
-              ),
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  removeAllData();
+            ...options.keys.map((index) {
+              return RadioListTile(
+                title: Text(index),
+                value: index,
+
+                /// java
+                groupValue: selectedOptions,
+                onChanged: (x) {
+                  selectedOptions = x;
+                  calculateVote();
+                  setState(() {});
                 },
-                child: const Text('Remove All'),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(list[index]["title"] ?? ""),
-                    subtitle: Text(list[index]["subtitle"] ?? ""),
-                    trailing: IconButton(
-                      onPressed: () {
-                        removeSingleData(index);
-                      },
-                      icon: Icon(Icons.delete),
-                    ),
-                  );
-                },
-              ),
+              );
+            }),
+            ...options.entries.map((x) {
+              return Text('${x.key} ${x.value}');
+            }),
+
+            ElevatedButton(
+              onPressed: () {
+                int max = 0;
+
+                String? winner = 'no one';
+
+                options.forEach((key, value) {
+                  if (value > max) {
+                    max = value;
+                    winner = key;
+                  }
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.green,
+                    content: Text('Winner: $winner'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              },
+              child: Text('Result'),
             ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> addData() async {
-    if (_titleController.text.isEmpty || _subtitleController.text.isEmpty) {
-      return;
-    }
-
-    Map<String, String> entry = {
-      "title": _titleController.text,
-      "subtitle": _subtitleController.text,
-    };
-
-    list.add(entry);
-
-    await informationController.setData(list);
-    setState(() {});
-
-    _titleController.clear();
-    _subtitleController.clear();
-  }
-
-  void removeSingleData(int index) async {
-    list.removeAt(index);
-    setState(() {});
-    await informationController.setData(list);
-  }
-
-  void removeAllData() async {
-    await informationController.removeAllData();
-    _loadData();
-
-    /// recall the load data
-    setState(() {});
   }
 }
