@@ -12,20 +12,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Map<String, dynamic> options = {'flutter': 0, 'java': 0, 'c': 0, 'mern': 0};
 
-  void calculateVote() {
-    options[selectedOptions!]++;
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Vote'),
-        backgroundColor: Colors.purpleAccent,
-        centerTitle: true,
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.camera))],
-      ),
+      appBar: _buildAppBar(),
 
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -50,23 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             ElevatedButton(
               onPressed: () {
-                int max = 0;
-
-                String? winner = 'no one';
-
-                options.forEach((key, value) {
-                  if (value > max) {
-                    max = value;
-                    winner = key;
-                  }
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    backgroundColor: Colors.green,
-                    content: Text('Winner: $winner'),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
+                buildWinner();
               },
               child: Text('Result'),
             ),
@@ -74,5 +48,39 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  buildWinner() {
+    int max = 0;
+    String? winner = 'no one';
+
+    options.forEach((key, value) {
+      if (value > max) {
+        max = value;
+        winner = key;
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.green,
+        content: Text('Winner: $winner'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: Text('Vote'),
+      backgroundColor: Colors.purpleAccent,
+      centerTitle: true,
+      actions: [IconButton(onPressed: () {}, icon: Icon(Icons.camera))],
+    );
+  }
+
+  void calculateVote() {
+    options[selectedOptions!]++;
+    setState(() {});
   }
 }
